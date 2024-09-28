@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MunicipioService
 {
@@ -25,11 +26,22 @@ class MunicipioService
      */
     public function listarMunicipios($uf)
     {
-        // Verifica qual provider está definido e chama o método correspondente.
-        if ($this->provider == 'brasil_api') {
-            return $this->listarMunicipiosBrasilAPI($uf);
-        } else {
-            return $this->listarMunicipiosIBGE($uf);
+        $uf = strtoupper($uf);
+
+        try {
+            switch ($this->provider) {
+                case 'brasil_api':
+                    return $this->listarMunicipiosBrasilAPI($uf);
+                case 'ibge_api':
+                    return $this->listarMunicipiosIBGE($uf);
+                default:
+                    // Lança uma exceção se o provider não for reconhecido
+                    throw new \Exception("Provider inválido: {$this->provider}");
+            }
+        } catch (\Exception $e) {
+            // Registra o erro no log antes de lançar a exceção
+            Log::error("Erro ao listar municípios para a UF: {$uf} - Provider: {$this->provider} - Erro: {$e->getMessage()}");
+            throw $e;
         }
     }
 
@@ -42,12 +54,16 @@ class MunicipioService
      */
     protected function listarMunicipiosBrasilAPI($uf)
     {
-        $response = Http::get("https://brasilapi.com.br/api/ibge/municipios/v1/{$uf}");
+        $ufMin = strtolower($uf);
 
-        if ($response->successful()) {
+        $response = Http::get("https://brasilapi.com.br/api/ibge/municipios/v1/{$ufMin}");
+
+        if ($response->successful() && is_array($response->json())) {
+            Log::info("Brasil API: Requisição bem-sucedida para {$ufMin}");
             return $response->json();
         }
 
+        Log::warning("Brasil API: Falha ao buscar municípios para {$ufMin}");
         return [];
     }
 
@@ -60,12 +76,16 @@ class MunicipioService
      */
     protected function listarMunicipiosIBGE($uf)
     {
-        $response = Http::get("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$uf}/municipios");
+        $ufMin = strtolower($uf);
 
-        if ($response->successful()) {
+        $response = Http::get("https://servicodados.ibge.gov.br/api/v1/localidades/estados/{$ufMin}/municipios");
+
+        if ($response->successful() && is_array($response->json())) {
+            Log::info("IBGE API: Requisição bem-sucedida para {$ufMin}");
             return $response->json();
         }
 
+        Log::warning("Brasil API: Falha ao buscar municípios para {$ufMin}");
         return [];
     }
 }
