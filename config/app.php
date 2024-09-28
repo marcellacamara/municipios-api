@@ -185,4 +185,6 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'provider_api' => env('PROVIDER_API', 'brasil_api'),
+
 ];
