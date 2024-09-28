@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Services\MunicipioService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class MunicipioServiceTest extends TestCase
@@ -112,5 +113,30 @@ class MunicipioServiceTest extends TestCase
 
         // Verifica se a resposta é um array vazio em caso de timeout
         $this->assertEmpty($resultados);
+    }
+
+    public function test_listar_municipios_com_cache()
+    {
+        // Simula a resposta da Brasil API e armazena em cache
+        Http::fake([
+            'https://brasilapi.com.br/api/ibge/municipios/v1/rs' => Http::response([
+                ['nome' => 'Porto Alegre', 'codigo_ibge' => '4314902'],
+                ['nome' => 'Canoas', 'codigo_ibge' => '4304606']
+            ], 200)
+        ]);
+
+        // Força a utilização do cache
+        Cache::shouldReceive('remember')->once()->andReturn([
+            ['nome' => 'Porto Alegre', 'codigo_ibge' => '4314902'],
+            ['nome' => 'Canoas', 'codigo_ibge' => '4304606']
+        ]);
+
+        $service = new MunicipioService();
+        $resultados = $service->listarMunicipios('RS');
+
+        // Verifica se os resultados são os esperados
+        $this->assertCount(2, $resultados);
+        $this->assertEquals('Porto Alegre', $resultados[0]['nome']);
+        $this->assertEquals('4314902', $resultados[0]['codigo_ibge']);
     }
 }
