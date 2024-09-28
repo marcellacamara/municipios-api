@@ -85,7 +85,7 @@ class MunicipioService
             return $response->json();
         }
 
-        Log::warning("Brasil API: Falha ao buscar municípios para {$ufMin}");
+        Log::warning("IBGE API: Falha ao buscar municípios para {$ufMin}");
         return [];
     }
 }
