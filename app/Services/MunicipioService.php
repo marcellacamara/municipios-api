@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class MunicipioService
 {
@@ -27,22 +28,24 @@ class MunicipioService
     public function listarMunicipios($uf)
     {
         $uf = strtoupper($uf);
+        $cacheKey = "municipios_{$this->provider}_{$uf}";
 
-        try {
-            switch ($this->provider) {
-                case 'brasil_api':
-                    return $this->listarMunicipiosBrasilAPI($uf);
-                case 'ibge_api':
-                    return $this->listarMunicipiosIBGE($uf);
-                default:
-                    // Lança uma exceção se o provider não for reconhecido
-                    throw new \Exception("Provider inválido: {$this->provider}");
+        // Cachea o resultado por 1 hora (3600 segundos)
+        return Cache::remember($cacheKey, 3600, function () use ($uf) {
+            try {
+                switch ($this->provider) {
+                    case 'brasil_api':
+                        return $this->listarMunicipiosBrasilAPI($uf);
+                    case 'ibge_api':
+                        return $this->listarMunicipiosIBGE($uf);
+                    default:
+                        throw new \Exception("Provider inválido: {$this->provider}");
+                }
+            } catch (\Exception $e) {
+                Log::error("Erro ao listar municípios para a UF: {$uf} - Provider: {$this->provider} - Erro: {$e->getMessage()}");
+                throw $e;
             }
-        } catch (\Exception $e) {
-            // Registra o erro no log antes de lançar a exceção
-            Log::error("Erro ao listar municípios para a UF: {$uf} - Provider: {$this->provider} - Erro: {$e->getMessage()}");
-            throw $e;
-        }
+        });
     }
 
     /**
