@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\MunicipioController;
 use Tests\TestCase;
 
 class MunicipioControllerTest extends TestCase
@@ -14,7 +15,15 @@ class MunicipioControllerTest extends TestCase
         // Verifica status 200 e estrutura do JSON
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => ['nome', 'codigo_ibge']
+            'data' => [
+                '*' => ['nome', 'codigo_ibge']
+            ],
+            'current_page',
+            'last_page',
+            'total',
+            'per_page',
+            'from',
+            'to'
         ]);
     }
 
@@ -28,7 +37,15 @@ class MunicipioControllerTest extends TestCase
         // Verifica status 200 e estrutura do JSON
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            '*' => ['nome', 'id']
+            'data' => [
+                '*' => ['nome', 'id']
+            ],
+            'current_page',
+            'last_page',
+            'total',
+            'per_page',
+            'from',
+            'to'
         ]);
     }
 
@@ -39,5 +56,19 @@ class MunicipioControllerTest extends TestCase
 
         // Verifica se o status é 404
         $response->assertStatus(404);
+    }
+
+    public function test_view_de_municipios_retorna_com_sucesso()
+    {
+        $response = $this->get('/api/municipios');
+        $response->assertStatus(200);
+
+        $response->assertViewIs('municipios');
+
+        // Verifica se cada UF está presente no conteúdo da página
+        $ufsEsperadas = MunicipioController::UFS_VALIDAS;
+        foreach ($ufsEsperadas as $uf) {
+            $response->assertSee($uf);
+        }
     }
 }
