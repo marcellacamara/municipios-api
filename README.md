@@ -1,66 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 Projeto: Municípios API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Descrição
 
-## About Laravel
+A **Municípios API** é uma aplicação construída em Laravel que permite a listagem de municípios brasileiros com base nas UFs. A aplicação utiliza duas fontes de dados como _providers_: a [Brasil API](https://brasilapi.com.br) e a API do [IBGE](https://servicodados.ibge.gov.br). O _provider_ é configurável através de variáveis de ambiente, tornando a aplicação flexível para diferentes cenários.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📝 Funcionalidades
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   Listar municípios de uma UF específica
+-   Paginação dos resultados
+-   Utilização de cache para otimizar o desempenho
+-   Troca de _provider_ via variável de ambiente
+-   Tratamento de exceções e erros
+-   Frontend simples utilizando Blade e Ajax para consulta e listagem de municípios
+-   Testes unitários e de integração
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🔧 Tecnologias Utilizadas
 
-## Learning Laravel
+-   Laravel 10
+-   PHP 8.1+
+-   Bootstrap 4.5
+-   Axios para requisições HTTP assíncronas no frontend
+-   Cache com Laravel Cache
+-   PHPUnit e HTTP Fake para testes
+-   API do Brasil API
+-   API do IBGE
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📄 Endpoints
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Listar Municípios por UF
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**GET** `/api/municipios/{uf}`
 
-## Laravel Sponsors
+-   **Descrição**: Retorna uma lista paginada de municípios para a UF informada.
+-   **Parâmetro**: `{uf}` - Código da Unidade Federativa (ex.: RS, SP, MG, etc.).
+-   **Resposta**:
+    ```json
+    {
+        "data": [
+            {
+                "name": "Porto Alegre",
+                "ibge_code": "4314902"
+            },
+            {
+                "name": "Canoas",
+                "ibge_code": "4304606"
+            }
+        ],
+        "current_page": 1,
+        "last_page": 2,
+        "total": 100,
+        "per_page": 50
+    }
+    ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Instruções de Instalação
 
-### Premium Partners
+1. Clone o repositório:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+    ```bash
+    git clone https://github.com/marcellacamara/municipios-api.git
+    cd municipios-api
+    ```
 
-## Contributing
+2. Instale as dependências:
+    ```bash
+    composer install
+    npm install
+    ```
+3. Configure o arquivo .env:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    - Copie o arquivo de exemplo .env.example:
 
-## Code of Conduct
+    ```bash
+    cp .env.example .env
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    - Configure as credenciais do banco de dados e o provider da API:
 
-## Security Vulnerabilities
+    ```bash
+    PROVIDER_API=brasil_api # Ou ibge_api
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. Gere a chave da aplicação:
 
-## License
+    ```bash
+    php artisan key:generate
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5. Compile os assets:
+
+    ```bash
+    npm run dev
+    ```
+
+6. Inicie o servidor de desenvolvimento:
+
+    ```bash
+    php artisan serve
+    ```
+
+## 🚀 Testes
+
+-   Para rodar os testes unitários e de integração, execute:
+
+    ```bash
+    php artisan test
+    ```
+
+## ⚙️ Variáveis de Ambiente
+
+-   **PROVIDER_API**: Define o provedor da API a ser utilizado. Valores possíveis: `brasil_api` ou `ibge_api`.
+
+## 📂 Estrutura do Projeto
+
+-   app/Http/Controllers: Controladores responsáveis por lidar com as requisições HTTP.
+-   app/Services: Serviços que encapsulam a lógica de negócio, como requisições às APIs externas.
+-   routes/api.php: Definições das rotas da API.
+-   tests/: Testes unitários e de integração.
+
+## Autores
+
+-   Feito com 💜 por [@marcellacamara](https://www.github.com/marcellacamara).
