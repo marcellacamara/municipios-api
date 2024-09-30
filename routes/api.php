@@ -15,4 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/municipios', [MunicipioController::class, 'index']);
 Route::get('/municipios/{uf}', [MunicipioController::class, 'listar']);
