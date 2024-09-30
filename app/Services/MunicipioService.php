@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MunicipioService
 {
@@ -25,13 +26,13 @@ class MunicipioService
      *
      * @return array Lista de municípios com nome e código IBGE.
      */
-    public function listarMunicipios($uf)
+    public function listarMunicipios($uf, $page = 1, $perPage = 10)
     {
         $uf = strtoupper($uf);
         $cacheKey = "municipios_{$this->provider}_{$uf}";
 
-        // Cachea o resultado por 1 hora (3600 segundos)
-        return Cache::remember($cacheKey, 3600, function () use ($uf) {
+        // Recupera ou armazena os municípios no cache
+        $municipios = Cache::remember($cacheKey, 3600, function () use ($uf) {
             try {
                 switch ($this->provider) {
                     case 'brasil_api':
@@ -46,6 +47,13 @@ class MunicipioService
                 throw $e;
             }
         });
+
+        // Cria um LengthAwarePaginator para paginar os resultados
+        $start = ($page - 1) * $perPage;
+        $items = array_slice($municipios, $start, $perPage);
+        return new LengthAwarePaginator($items, count($municipios), $perPage, $page, [
+            'path' => url()->current()
+        ]);
     }
 
     /**
